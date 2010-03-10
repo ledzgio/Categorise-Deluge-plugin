@@ -50,7 +50,6 @@ import mimetypes
 #from send_message import send_msg
 import datetime
 
-#TODO
 #New categories: video, audio, data (iso, applications, ecc.), documents, uncategorized
 
 DEFAULT_PREFS = {
