@@ -49,9 +49,6 @@ import random
 import mimetypes
 #from send_message import send_msg
 import datetime
-##import logging
-#from deluge.core import core
-from deluge.ui.client import client
 
 #New categories: video, audio, data (iso, applications, ecc.), documents, uncategorized
 
