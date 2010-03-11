@@ -64,23 +64,35 @@ class GtkUI(GtkPluginBase):
         del self.glade
 
     def on_apply_prefs(self):
-        log.debug("### Applying prefs for Categorise")
+        log.debug("Applying prefs for Categorise")
         download_path = self.glade.get_widget("download_folder").get_current_folder()
         root_path = self.glade.get_widget("root_folder").get_text()
         audio_path = self.glade.get_widget("audio_folder").get_text()
         video_path = self.glade.get_widget("video_folder").get_text()
         doc_path = self.glade.get_widget("doc_folder").get_text()
-        images_path = self.glade.get_widget("data_folder").get_text()
+        data_path = self.glade.get_widget("data_folder").get_text()
         full_download_path = os.path.join(download_path, root_path)
+        
+        #jabber notification
+        jabber_id = self.glade.get_widget("jabber_id").get_text()
+        #jabber_password = sha_hash(self.glade.get_widget("jabber_password").get_text()).hexdigest()
+        jabber_password = self.glade.get_widget("jabber_password").get_text()
+        jabber_recpt_id = self.glade.get_widget("jabber_recpt_id").get_text()
+        enable_notification = self.glade.get_widget("enable_notification").get_active()
         
         config = {
             "download_path": download_path,
             "root_folder": root_path,
             "sub_audio": audio_path,
             "sub_video": video_path,
-            "sub_data":"data",
+            "sub_data":data_path,
             "sub_documents": doc_path,
-            "full_download_path": full_download_path
+            "full_download_path": full_download_path,
+            "jabber_id":jabber_id,
+            "jabber_password":jabber_password,
+            "jabber_recpt_id":jabber_recpt_id,
+            "enable_notification":enable_notification,
+           # "on_enable_notification_toggled":self.on_toggle_notification
         }
         client.categorise.set_config(config)
 
@@ -91,8 +103,24 @@ class GtkUI(GtkPluginBase):
         self.glade.get_widget("video_folder").show()
         self.glade.get_widget("doc_folder").show()
         self.glade.get_widget("data_folder").show()
-        client.categorise.get_config().addCallback(self.cb_get_config)
-
-    def cb_get_config(self, config):
-        "callback for on show_prefs"
-        self.glade.get_widget("download_folder").set_current_folder(config["download_path"])
+        
+        self.glade.get_widget("jabber_id").show()
+        self.glade.get_widget("jabber_password").show()
+        self.glade.get_widget("jabber_recpt_id").show()
+        self.glade.get_widget("enable_notification").show()
+        
+        def on_get_config(config):
+            self.glade.get_widget("download_folder").set_current_folder(config["download_path"])
+            self.glade.get_widget("root_folder").set_text(config["root_folder"])
+            self.glade.get_widget("audio_folder").set_text(config["sub_audio"])
+            self.glade.get_widget("video_folder").set_text(config["sub_video"])
+            self.glade.get_widget("doc_folder").set_text(config["sub_documents"])
+            self.glade.get_widget("data_folder").set_text(config["sub_data"])
+            
+            self.glade.get_widget("jabber_id").set_text(config["jabber_id"])
+            self.glade.get_widget("jabber_password").set_text(config["jabber_password"])
+            self.glade.get_widget("jabber_recpt_id").set_text(config["jabber_recpt_id"])
+            self.glade.get_widget("enable_notification").set_active(config["enable_notification"])
+            
+        client.categorise.get_config().addCallback(on_get_config)
+     

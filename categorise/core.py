@@ -46,11 +46,9 @@ from deluge.core.core import Core
 import shutil
 import os
 import random
-import mimetypes
-#from send_message import send_msg
+import mimetypes as mt
+from send_message import send_msg
 import datetime
-
-#New categories: video, audio, data (iso, applications, ecc.), documents, uncategorized
 
 DEFAULT_PREFS = {
     #sub directories
@@ -62,101 +60,98 @@ DEFAULT_PREFS = {
     "sub_data":"data",
     "sub_documents":"documents",
     "sub_uncat":"uncategorized",
+    
+    "jabber_id":"",
+    "jabber_password":"",
+    "jabber_recpt_id":"",
+    "enable_notification":False
 }
 #File formats
 DOC_FORMAT = [".pdf",".doc",".ods", ".txt", ".odt", ".xls", ".docx"]
 DATA_FORMAT = [".iso", ".img", ".mds", ".mdf", ".nrg", ".bin", ".cue",
                ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", ".exe", ".msi"]
+GREY_LIST = [".txt", ".nfo"]
 
 class Core(CorePluginBase):
     def enable(self):
-        log.debug("###Enabling plugin..")
+        log.debug("Enabling Categorise plugin..")
         self.config = deluge.configmanager.ConfigManager("categorise.conf", DEFAULT_PREFS)
         
         self.config["full_download_path"] = os.path.join(self.config["download_path"], self.config["root_folder"])
-        log.debug("### move completed dir %s", self.config["full_download_path"])
         
         #setting event
         component.get("EventManager").register_event_handler("TorrentFinishedEvent", self._on_torrent_finished)
-        
-        #enable log to file
-##        self._init_logger()
-##        logging.info("Starting session..")
     
     def disable(self):
-        log.debug("###Disabling plugin.")
-##        logging.shutdown()
+        log.debug("Disabling Categorise plugin.")
         
     def update(self):
         pass
         
     def _on_torrent_finished(self, torrent_id):
-        # Get the save path
+        """Get the save path"""
         torrent = component.get("TorrentManager")[torrent_id]
         total_download_byte = torrent.get_status(["total_payload_download"])["total_payload_download"]
         total_download_converted = self._convert_bytes(total_download_byte)
         torrent_name = torrent.get_status(["name"])["name"]
-##        logging.info("completed torrent "+torrent_name+", downloaded %s", total_download)
-        log.debug("#### completed torrent "+torrent_name+", downloaded "+ `total_download_converted`)
+        
+        log.debug("completed torrent: %s", torrent_name)
+        
         files = torrent.get_files()
         
-        #torrent_details = "Torrent: "+torrent_name+" containing\n"+"N files: "+`len(files)`+"\nSize: "+ `total_download_converted`+"\n"
+        """create torrent details string"""
+        torrent_details = "\nTorrent: "+torrent_name+"\nSize: "+ `total_download_converted`+"\nfile(s): "+`len(files)`+"\n"
         
+        """get random file from from the torrent"""
         random_file = self._get_random_elem(files)
-        log.debug("### analyzing random file %s", random_file["path"])
+                
         #get destination path
         dest = self._guess_destination(random_file, files)
         i = 0
-        """
         for f in files:
             i = i + 1
-            torrent_details = torrent_details + f + "\n"
-            if i == 15:
-                torrent_details = torrent_details + "..."+`len(files)-i`+" more"
+            downloaded_file_path = f["path"]
+            torrent_details = torrent_details + `downloaded_file_path` + "\n"
+            if i == 3:
+                torrent_details = torrent_details + "..."+`len(files)-i`+" more\n"
                 break
-        torrent_details = torrent_details + "Identyfied type: "+dest[1]+"\nCompleted at: "+_get_current_datetime()+"\nMoved to folder: "+dest[0]
-        """
-        log.debug("### torrent destination path %s", dest[0])
+	    now = datetime.datetime.now()
+	    date_time = now.strftime("%Y-%m-%d %H:%M")
+        torrent_details = torrent_details + "Identyfied type: "+dest[1]+"\nCompleted at: "+`date_time`+"\nMoved to folder: "+dest[0]
+        
         if not os.path.exists(dest[0]):
-            log.debug("### directory "+ dest[0] +" does not exists, it will be created")
-##            logging.info("creating directory %s", dest[0])
+            log.debug("directory "+ dest[0] +" does not exists, it will be created")
             os.makedirs(dest[0])
-        #moving torrent storage to final destination
+            
+        """moving torrent storage to final destination"""
         torrent.move_storage(dest[0])
         torrent.is_finished = True
         torrent.update_state()
-##        logging.info("moving finished torrent containing "+`len(files)`+" files to %s", dest[0])
-        log.debug("#### moving finished torrent containing "+`len(files)`+" file(s) to %s", dest[0])
-        #sending message to jabber user
-        #log.debug("#### sending messgage "+torrent_details)
-        
-        #send_msg(torrent_details)
-        
-        #log.debug("#### message sent to jabber user ledzgio@jabber.org")
+
+        log.debug("moving completed torrent containing "+`len(files)`+" file(s) to %s", dest[0])
+       
+        """sending message to jabber user"""
+        if(self.config["enable_notification"] and self.config["jabber_id"] and self.config["jabber_password"] and self.config["jabber_recpt_id"]):
+            send_msg(torrent_details, self.config["jabber_id"], self.config["jabber_password"], self.config["jabber_recpt_id"])
+        log.debug("notification sent to %s", self.config["jabber_recpt_id"])
             
-    
     def _guess_destination(self, file, torrent_files):
         full_download_path = self.config["full_download_path"]
-        ext = os.path.splitext(file["path"])
+        ext = os.path.splitext(file["path"])[1]
         
-        log.debug("####file path %s", file["path"])
+         #grab a new file
+        if ((ext in GREY_LIST) and len(torrent_files) > 1):
+            another_file = self._get_random_elem(torrent_files, file["path"])
+            ext = os.path.splitext(another_file["path"])[1]
         
-        log.debug("#####getting mimetype..")
+        mt.guess_extension(ext)
         
-        log.debug("1############################################1")
-        #log.debug(dcore.get_config())
-	#dcore = Core()
-	#print dcore.get_config()
-        log.debug("2############################################2")
-        #log.debug(dcore.get_config())
-        
-	#http://dev.deluge-torrent.org/wiki/Development/UiClient1.2
-
-        #res = mimetypes.guess_type(file["path"])[0]
-        #download_location = self.get_config()["download_location"]
-        
-	log.debug("#####download location: %s", download_location)
-        res = mimetypes.guess_type(file["path"])[0]
+        """if unknown type put torrent to the uncategorized directory"""
+        try:
+            res = mt.types_map[ext]
+        except KeyError:
+            log.debug("unknown extension %s", ext)
+            return [os.path.join(full_download_path, self.config["sub_uncat"]), "uncategorized"]
         
         if (res.startswith("audio")):
             return [os.path.join(full_download_path, self.config["sub_audio"]), "audio"]
@@ -167,40 +162,37 @@ class Core(CorePluginBase):
         elif(ext in DATA_FORMAT):
             return [os.path.join(full_download_path, self.config["sub_data"]), "data"]
         else:
-            return [os.path.join(full_download_path, self.config["sub_uncat"]), "uncat"]
-            
-    def _get_current_datetime(self):
-	now = datetime.datetime.now()
-	return now.strftime("%Y-%m-%d %H:%M")
+            return [os.path.join(full_download_path, self.config["sub_uncat"]), "uncategorized"]
         
-    def _get_random_elem(self, list):
+        
+    def _get_random_elem(self, list, compare_file=""):
         length = len(list)
-        rand_number = random.randint(0, length - 1)
-        return list[rand_number]
+        while True:
+            if length == 0:
+                break
+            rand_number = random.randint(0, length - 1)
+            choosen_file = list[rand_number]
+            if ((compare_file == "") or (compare_file != "" and compare_file != choosen_file)):
+                break
+        return choosen_file
     
     def _convert_bytes(self, bytes):
         bytes = float(bytes)
         if bytes >= 1099511627776:
             terabytes = bytes / 1099511627776
-            size = '%.2fT' % terabytes
+            size = '%.2fTb' % terabytes
         elif bytes >= 1073741824:
             gigabytes = bytes / 1073741824
-            size = '%.2fG' % gigabytes
+            size = '%.2fGb' % gigabytes
         elif bytes >= 1048576:
             megabytes = bytes / 1048576
-            size = '%.2fM' % megabytes
+            size = '%.2fMb' % megabytes
         elif bytes >= 1024:
             kilobytes = bytes / 1024
-            size = '%.2fK' % kilobytes
+            size = '%.2fKb' % kilobytes
         else:
-            size = '%.2fb' % bytes
+            size = '%.2fbytes' % bytes
         return size
-    
-##    def _init_logger(self):
-##        LOG_FILENAME = os.path.join(self.config["full_download_path"], "folders.log")
-##        # create logger
-##        logging.basicConfig(filename=LOG_FILENAME, level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-##        log.debug("######## log initialized at %s", LOG_FILENAME)
         
     @export
     def set_config(self, config):

@@ -42,10 +42,10 @@ from setuptools import setup
 __plugin_name__ = "Categorise"
 __author__ = "ledzgio"
 __author_email__ = "ledzgio@writeme.com"
-__version__ = "1.0"
-__url__ = ""
+__version__ = "0.2"
+__url__ = "http://github.com/ledzgio/Categorise-Deluge-plugin.git"
 __license__ = "GPLv3"
-__description__ = ""
+__description__ = "Move a downloaded torrent to a specific directory depending on it's type (audio, video, documents and data)"
 __long_description__ = """"""
 __pkg_data__ = {__plugin_name__.lower(): ["template/*", "data/*"]}
 

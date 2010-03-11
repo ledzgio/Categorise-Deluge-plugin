@@ -36,8 +36,8 @@
                       <widget class="GtkFileChooserButton" id="download_folder">
                         <property name="visible">True</property>
                         <property name="tooltip" translatable="yes">Deluge download directory</property>
-                        <property name="create_folders">False</property>
                         <property name="action">select-folder</property>
+                        <property name="create_folders">False</property>
                         <property name="title" translatable="yes">Select A Directory</property>
                       </widget>
                       <packing>
@@ -61,22 +61,6 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkEntry" id="root_folder">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="tooltip" translatable="yes">The directory name that will contains the sub-categories defined below</property>
-                        <property name="invisible_char">&#x25CF;</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="y_options">GTK_FILL</property>
-                        <property name="x_padding">10</property>
-                      </packing>
-                    </child>
-                    <child>
                       <widget class="GtkLabel" id="label12">
                         <property name="visible">True</property>
                         <property name="xalign">1</property>
@@ -94,6 +78,7 @@
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">The audio directory</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="text" translatable="yes">audio</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -122,6 +107,7 @@
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">The video directory</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="text" translatable="yes">video</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -150,6 +136,7 @@
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">The documents directory</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="text" translatable="yes">documents</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -178,12 +165,30 @@
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">The data directory</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="text" translatable="yes">data</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
                         <property name="top_attach">5</property>
                         <property name="bottom_attach">6</property>
+                        <property name="y_options">GTK_FILL</property>
+                        <property name="x_padding">10</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="root_folder">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip" translatable="yes">The directory name that will contains the sub-categories defined below</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="text" translatable="yes">categories</property>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                         <property name="y_options">GTK_FILL</property>
                         <property name="x_padding">10</property>
                       </packing>
@@ -222,14 +227,14 @@
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <widget class="GtkCheckButton" id="checkbutton3">
+                      <widget class="GtkCheckButton" id="enable_notification">
                         <property name="label" translatable="yes">Enable notification</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip" translatable="yes">Enable/disable jabber notification: notify completed download to a jabber user</property>
                         <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_alerts_toggle"/>
+                        <signal name="toggled" handler="on_enable_notification_toggled"/>
                       </widget>
                       <packing>
                         <property name="padding">2</property>
@@ -253,11 +258,10 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkEntry" id="entry12">
+                          <widget class="GtkEntry" id="jabber_id">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip" translatable="yes">Your jabber username</property>
-                            <property name="editable">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="text" translatable="yes">username@jabber.org</property>
                           </widget>
@@ -281,11 +285,10 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkEntry" id="entry13">
+                          <widget class="GtkEntry" id="jabber_password">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip" translatable="yes">Your jabber password</property>
-                            <property name="editable">False</property>
                             <property name="visibility">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="text" translatable="yes">password</property>
@@ -312,11 +315,10 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkEntry" id="entry14">
+                          <widget class="GtkEntry" id="jabber_recpt_id">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip" translatable="yes">The jabber recipient of the notification</property>
-                            <property name="editable">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="text" translatable="yes">recipient@jabber.org</property>
                           </widget>
@@ -342,7 +344,7 @@
               <widget class="GtkLabel" id="label9">
                 <property name="visible">True</property>
                 <property name="tooltip" translatable="yes">Enable/disable jabber notification: notify completed download to a jabber user. Notification requires pyxmpp installed. With debian/ubuntu just type: sudo apt-get install python-pyxmpp</property>
-                <property name="label" translatable="yes">&lt;b&gt;Jabber notification &lt;/b&gt;&lt;i&gt;(not implemented yet)&lt;/i&gt;</property>
+                <property name="label" translatable="yes">&lt;b&gt;Jabber notification &lt;/b&gt;&lt;i&gt;(requires pyxmpp installed to work)&lt;/i&gt;</property>
                 <property name="use_markup">True</property>
               </widget>
               <packing>
