@@ -91,8 +91,7 @@ class GtkUI(GtkPluginBase):
             "jabber_id":jabber_id,
             "jabber_password":jabber_password,
             "jabber_recpt_id":jabber_recpt_id,
-            "enable_notification":enable_notification,
-           # "on_enable_notification_toggled":self.on_toggle_notification
+            "enable_notification":enable_notification
         }
         client.categorise.set_config(config)
 
