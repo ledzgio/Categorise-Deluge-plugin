@@ -70,7 +70,7 @@ DEFAULT_PREFS = {
 DOC_FORMAT = [".pdf",".doc",".ods", ".txt", ".odt", ".xls", ".docx"]
 DATA_FORMAT = [".iso", ".img", ".mds", ".mdf", ".nrg", ".bin", ".cue",
                ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", ".exe", ".msi"]
-GREY_LIST = [".txt", ".nfo", ".jpg", ".gif", ".m3u"]
+GREY_LIST = [".txt", ".nfo", ".jpg", ".gif", ".m3u" ".sfv"]
 
 class Core(CorePluginBase):
     def enable(self):
