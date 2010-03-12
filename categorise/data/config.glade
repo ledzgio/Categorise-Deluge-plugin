@@ -228,7 +228,7 @@
                     <property name="orientation">vertical</property>
                     <child>
                       <widget class="GtkCheckButton" id="enable_notification">
-                        <property name="label" translatable="yes">Enable notification</property>
+                        <property name="label" translatable="yes">enable notification</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -263,7 +263,7 @@
                             <property name="can_focus">True</property>
                             <property name="tooltip" translatable="yes">Your jabber username</property>
                             <property name="invisible_char">&#x25CF;</property>
-                            <property name="text" translatable="yes">username@jabber.org</property>
+                            <property name="text" translatable="yes">sender@jabber.org</property>
                           </widget>
                           <packing>
                             <property name="left_attach">1</property>
