@@ -70,7 +70,7 @@ DEFAULT_PREFS = {
 DOC_FORMAT = [".pdf",".doc",".ods", ".txt", ".odt", ".xls", ".docx"]
 DATA_FORMAT = [".iso", ".img", ".mds", ".mdf", ".nrg", ".bin", ".cue",
                ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", ".exe", ".msi"]
-GREY_LIST = [".txt", ".nfo"]
+GREY_LIST = [".txt", ".nfo", ".jpg", ".gif", ".m3u"]
 
 class Core(CorePluginBase):
     def enable(self):
@@ -132,8 +132,11 @@ class Core(CorePluginBase):
        
         """sending message to jabber user"""
         if(self.config["enable_notification"] and self.config["jabber_id"] and self.config["jabber_password"] and self.config["jabber_recpt_id"]):
-            send_msg(torrent_details, self.config["jabber_id"], self.config["jabber_password"], self.config["jabber_recpt_id"])
-        log.debug("notification sent to %s", self.config["jabber_recpt_id"])
+            sent = send_msg(torrent_details, self.config["jabber_id"], self.config["jabber_password"], self.config["jabber_recpt_id"])
+        if sent:
+            log.debug("notification sent with success to %s", self.config["jabber_recpt_id"])
+        else:
+            log.debug("notification not sent. Check if you have pyxmpp module installed on you system")
             
     def _guess_destination(self, file, torrent_files):
         full_download_path = self.config["full_download_path"]
