@@ -100,7 +100,7 @@ class Core(CorePluginBase):
         files = torrent.get_files()
         
         """create torrent details string"""
-        torrent_details = "\nTorrent: "+torrent_name+"\nSize: "+ `total_download_converted`+"\nfile(s): "+`len(files)`+"\n"
+        torrent_details = "\nTorrent: "+torrent_name+"\nSize: "+ `total_download_converted` +"\nfile(s): "+`len(files)`+"\n"
         
         """get random file from from the torrent"""
         random_file = self._get_random_elem(files)
@@ -111,13 +111,13 @@ class Core(CorePluginBase):
         for f in files:
             i = i + 1
             downloaded_file_path = f["path"]
-            torrent_details = torrent_details + `downloaded_file_path` + "\n"
+            torrent_details = torrent_details + downloaded_file_path + "\n"
             if i == 3:
                 torrent_details = torrent_details + "..."+`len(files)-i`+" more\n"
                 break
 	    now = datetime.datetime.now()
 	    date_time = now.strftime("%Y-%m-%d %H:%M")
-        torrent_details = torrent_details + "Identyfied type: "+dest[1]+"\nCompleted at: "+`date_time`+"\nMoved to folder: "+dest[0]
+        torrent_details = torrent_details + "Identyfied type: "+dest[1]+"\nCompleted at: "+ date_time +"\nMoved to folder: "+dest[0]
         
         if not os.path.exists(dest[0]):
             log.debug("directory "+ dest[0] +" does not exists, it will be created")
@@ -131,12 +131,14 @@ class Core(CorePluginBase):
         log.debug("moving completed torrent containing "+`len(files)`+" file(s) to %s", dest[0])
        
         """sending message to jabber user"""
+        
+        log.debug("########checking condition..")
+        log.debug(self.config["enable_notification"] and self.config["jabber_id"] and self.config["jabber_password"] and self.config["jabber_recpt_id"])
         if(self.config["enable_notification"] and self.config["jabber_id"] and self.config["jabber_password"] and self.config["jabber_recpt_id"]):
+            log.debug("#######sending notification....")
             sent = send_msg(torrent_details, self.config["jabber_id"], self.config["jabber_password"], self.config["jabber_recpt_id"])
-        if sent:
-            log.debug("notification sent with success to %s", self.config["jabber_recpt_id"])
-        else:
-            log.debug("notification not sent. Check if you have pyxmpp module installed on you system")
+            if not sent:
+                log.debug("Notification not sent. Check if you have pyxmpp module installed on you system")
             
     def _guess_destination(self, file, torrent_files):
         full_download_path = self.config["full_download_path"]
