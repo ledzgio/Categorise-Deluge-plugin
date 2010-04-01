@@ -1,1 +1,4 @@
-Categorise deluge plugin version 0.2.1
+Categorise deluge plugin version 0.3 compatible with Deluge 1.2.x
+
+If you already have Categorise at version prior to 0.3, you should remove Categorise config file:
+rm $HOME/.config/deluge/categorise.conf

@@ -53,8 +53,6 @@ import datetime
 DEFAULT_PREFS = {
     #sub directories
     "download_path": "",
-    "full_download_path":"",
-    "root_folder":"categories",
     "sub_audio":"audio",
     "sub_video":"video",
     "sub_data":"data",
@@ -69,16 +67,15 @@ DEFAULT_PREFS = {
 #File formats
 DOC_FORMAT = [".pdf",".doc",".ods", ".txt", ".odt", ".xls", ".docx"]
 DATA_FORMAT = [".iso", ".img", ".mds", ".mdf", ".nrg", ".bin", ".cue",
-               ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", ".exe", ".msi"]
-GREY_LIST = [".txt", ".nfo", ".jpg", ".gif", ".m3u" ".sfv"]
+               ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", 
+               ".exe", ".msi", ".vob", ".ifo"]
+GREY_LIST = [".txt", ".nfo", ".jpg", ".gif", ".m3u" ".sfv", ".url"]
 
 class Core(CorePluginBase):
     def enable(self):
         log.debug("Enabling Categorise plugin..")
         self.config = deluge.configmanager.ConfigManager("categorise.conf", DEFAULT_PREFS)
-        
-        self.config["full_download_path"] = os.path.join(self.config["download_path"], self.config["root_folder"])
-        
+                
         #setting event
         component.get("EventManager").register_event_handler("TorrentFinishedEvent", self._on_torrent_finished)
     
@@ -100,7 +97,7 @@ class Core(CorePluginBase):
         files = torrent.get_files()
         
         """create torrent details string"""
-        torrent_details = "\nTorrent: "+torrent_name+"\nSize: "+ `total_download_converted` +"\nfile(s): "+`len(files)`+"\n"
+        torrent_details = "\nTorrent name: "+torrent_name+"\nSize: "+ `total_download_converted` +"\nContained file(s): "+`len(files)`+"\n"
         
         """get random file from from the torrent"""
         random_file = self._get_random_elem(files)
@@ -116,8 +113,8 @@ class Core(CorePluginBase):
                 torrent_details = torrent_details + "..."+`len(files)-i`+" more\n"
                 break
 	    now = datetime.datetime.now()
-	    date_time = now.strftime("%Y-%m-%d %H:%M")
-        torrent_details = torrent_details + "Identyfied type: "+dest[1]+"\nCompleted at: "+ date_time +"\nMoved to folder: "+dest[0]
+	    date_time = now.strftime("%Y-%m-%d, %H:%M")
+        torrent_details = torrent_details + "Identified type: "+dest[1]+"\nCompleted at: "+ date_time +"\nMoved to folder: "+dest[0]
         
         if not os.path.exists(dest[0]):
             log.debug("directory "+ dest[0] +" does not exists, it will be created")
@@ -131,17 +128,15 @@ class Core(CorePluginBase):
         log.debug("moving completed torrent containing "+`len(files)`+" file(s) to %s", dest[0])
        
         """sending message to jabber user"""
-        
-        log.debug("########checking condition..")
-        log.debug(self.config["enable_notification"] and self.config["jabber_id"] and self.config["jabber_password"] and self.config["jabber_recpt_id"])
-        if(self.config["enable_notification"] and self.config["jabber_id"] and self.config["jabber_password"] and self.config["jabber_recpt_id"]):
-            log.debug("#######sending notification....")
-            sent = send_msg(torrent_details, self.config["jabber_id"], self.config["jabber_password"], self.config["jabber_recpt_id"])
+        #decode password
+        decoded_password = self._decode_password(self.config["jabber_password"])
+        if(self.config["enable_notification"] and self.config["jabber_id"] and decoded_password and self.config["jabber_recpt_id"]):
+            sent = send_msg(torrent_details, self.config["jabber_id"], decoded_password, self.config["jabber_recpt_id"])
             if not sent:
                 log.debug("Notification not sent. Check if you have pyxmpp module installed on you system")
             
     def _guess_destination(self, file, torrent_files):
-        full_download_path = self.config["full_download_path"]
+        download_path = self.config["download_path"]
         ext = os.path.splitext(file["path"])[1]
         
          #grab a new file
@@ -156,18 +151,18 @@ class Core(CorePluginBase):
             res = mt.types_map[ext]
         except KeyError:
             log.debug("unknown extension %s", ext)
-            return [os.path.join(full_download_path, self.config["sub_uncat"]), "uncategorized"]
+            return [os.path.join(download_path, self.config["sub_uncat"]), "uncategorized"]
         
         if (res.startswith("audio")):
-            return [os.path.join(full_download_path, self.config["sub_audio"]), "audio"]
+            return [os.path.join(download_path, self.config["sub_audio"]), "audio"]
         elif (res.startswith("video")):
-            return [os.path.join(full_download_path, self.config["sub_video"]), "video"]
+            return [os.path.join(download_path, self.config["sub_video"]), "video"]
         elif(ext in DOC_FORMAT):
-            return [os.path.join(full_download_path, self.config["sub_documents"]), "doc"]
+            return [os.path.join(download_path, self.config["sub_documents"]), "doc"]
         elif(ext in DATA_FORMAT):
-            return [os.path.join(full_download_path, self.config["sub_data"]), "data"]
+            return [os.path.join(download_path, self.config["sub_data"]), "data"]
         else:
-            return [os.path.join(full_download_path, self.config["sub_uncat"]), "uncategorized"]
+            return [os.path.join(download_path, self.config["sub_uncat"]), "uncategorized"]
         
         
     def _get_random_elem(self, list, compare_file=""):
@@ -198,6 +193,10 @@ class Core(CorePluginBase):
         else:
             size = '%.2fbytes' % bytes
         return size
+    
+    def _decode_password(self, enc_passwd):
+        import base64
+        return base64.b64decode(enc_passwd)
         
     @export
     def set_config(self, config):

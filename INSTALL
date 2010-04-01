@@ -1,7 +1,14 @@
-To create a plugin egg run:
+Please read the README file before.
+
+Plugin generation:
+To create a plugin egg from sources just run:
 
 python setup.py bdist_egg
 
-which will create a .egg file in the directory dist
+which will create a .egg file in the dist directory.
 
-Then use the plugin install from deluge plugin preferences page
+GUI install:
+Load the .egg file through the deluge plugin preferences page
+
+Manual install:
+Simply copy the .egg generated installation file to $HOME/.config/deluge/plugins
