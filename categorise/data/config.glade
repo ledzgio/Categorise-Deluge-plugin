@@ -25,7 +25,7 @@
                       <widget class="GtkLabel" id="label10">
                         <property name="visible">True</property>
                         <property name="xalign">1</property>
-                        <property name="label" translatable="yes">Downloads directory:</property>
+                        <property name="label" translatable="yes">Download directory:</property>
                         <property name="justify">right</property>
                       </widget>
                       <packing>
@@ -35,7 +35,7 @@
                     <child>
                       <widget class="GtkFileChooserButton" id="download_folder">
                         <property name="visible">True</property>
-                        <property name="tooltip" translatable="yes">Deluge download directory</property>
+                        <property name="tooltip" translatable="yes">Categorise download directory: all the downloaded files will be moved to the chosen category (see settings below) under this directory</property>
                         <property name="action">select-folder</property>
                         <property name="create_folders">False</property>
                         <property name="title" translatable="yes">Select A Directory</property>
@@ -48,26 +48,13 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="label11">
-                        <property name="visible">True</property>
-                        <property name="xalign">1</property>
-                        <property name="label" translatable="yes">Categories directory:</property>
-                        <property name="justify">right</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
                       <widget class="GtkLabel" id="label12">
                         <property name="visible">True</property>
                         <property name="xalign">1</property>
                         <property name="label" translatable="yes">Audio directory:</property>
                       </widget>
                       <packing>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">1</property>
                         <property name="bottom_attach">3</property>
                         <property name="y_options">GTK_FILL</property>
                       </packing>
@@ -83,7 +70,7 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">1</property>
                         <property name="bottom_attach">3</property>
                         <property name="y_options">GTK_FILL</property>
                         <property name="x_padding">10</property>
@@ -176,23 +163,6 @@
                         <property name="x_padding">10</property>
                       </packing>
                     </child>
-                    <child>
-                      <widget class="GtkEntry" id="root_folder">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="tooltip" translatable="yes">The directory name that will contains the sub-categories defined below</property>
-                        <property name="invisible_char">&#x25CF;</property>
-                        <property name="text" translatable="yes">categories</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="y_options">GTK_FILL</property>
-                        <property name="x_padding">10</property>
-                      </packing>
-                    </child>
                   </widget>
                 </child>
               </widget>
@@ -228,7 +198,7 @@
                     <property name="orientation">vertical</property>
                     <child>
                       <widget class="GtkCheckButton" id="enable_notification">
-                        <property name="label" translatable="yes">enable notification</property>
+                        <property name="label" translatable="yes">Enable notification</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
