@@ -68,8 +68,8 @@ DEFAULT_PREFS = {
 DOC_FORMAT = [".pdf",".doc",".ods", ".txt", ".odt", ".xls", ".docx"]
 DATA_FORMAT = [".iso", ".img", ".mds", ".mdf", ".nrg", ".bin", ".cue",
                ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", 
-               ".exe", ".msi", ".vob", ".ifo"]
-GREY_LIST = [".txt", ".nfo", ".jpg", ".gif", ".m3u" ".sfv", ".url"]
+               ".exe", ".msi", ".vob", ".nfo"]
+GREY_LIST = [".txt", ".nfo", ".jpg", ".gif", ".m3u" ".sfv", ".url", ".sub", ".srt"]
 
 class Core(CorePluginBase):
     def enable(self):
@@ -92,18 +92,24 @@ class Core(CorePluginBase):
         total_download_converted = self._convert_bytes(total_download_byte)
         torrent_name = torrent.get_status(["name"])["name"]
         
+        """
+        TODO
+        torrent_eta = torrent.get_eta()
+        torrent_ratio = torrent.get_ratio()
+        log.debug("#################################")
+        log.debug("ETA: %s", torrent_eta)
+        log.debug("RATIO: %s", torrent_ratio)
+        """
+        
         log.debug("completed torrent: %s", torrent_name)
         
         files = torrent.get_files()
         
         """create torrent details string"""
         torrent_details = "\nTorrent name: "+torrent_name+"\nSize: "+ `total_download_converted` +"\nContained file(s): "+`len(files)`+"\n"
-        
-        """get random file from from the torrent"""
-        random_file = self._get_random_elem(files)
                 
         #get destination path
-        dest = self._guess_destination(random_file, files)
+        dest = self._guess_destination(files)
         i = 0
         for f in files:
             i = i + 1
@@ -135,46 +141,31 @@ class Core(CorePluginBase):
             if not sent:
                 log.debug("Notification not sent. Check if you have pyxmpp module installed on you system")
             
-    def _guess_destination(self, file, torrent_files):
+    def _guess_destination(self, torrent_files):
         download_path = self.config["download_path"]
-        ext = os.path.splitext(file["path"])[1]
-        
-         #grab a new file
-        if ((ext in GREY_LIST) and len(torrent_files) > 1):
-            another_file = self._get_random_elem(torrent_files, file["path"])
-            ext = os.path.splitext(another_file["path"])[1]
-        
-        mt.guess_extension(ext)
-        
-        """if unknown type put torrent to the uncategorized directory"""
-        try:
-            res = mt.types_map[ext]
-        except KeyError:
-            log.debug("unknown extension %s", ext)
-            return [os.path.join(download_path, self.config["sub_uncat"]), "uncategorized"]
-        
-        if (res.startswith("audio")):
-            return [os.path.join(download_path, self.config["sub_audio"]), "audio"]
-        elif (res.startswith("video")):
-            return [os.path.join(download_path, self.config["sub_video"]), "video"]
-        elif(ext in DOC_FORMAT):
-            return [os.path.join(download_path, self.config["sub_documents"]), "doc"]
-        elif(ext in DATA_FORMAT):
-            return [os.path.join(download_path, self.config["sub_data"]), "data"]
-        else:
-            return [os.path.join(download_path, self.config["sub_uncat"]), "uncategorized"]
-        
-        
-    def _get_random_elem(self, list, compare_file=""):
-        length = len(list)
-        while True:
-            if length == 0:
-                break
-            rand_number = random.randint(0, length - 1)
-            choosen_file = list[rand_number]
-            if ((compare_file == "") or (compare_file != "" and compare_file != choosen_file)):
-                break
-        return choosen_file
+
+        for file in torrent_files:
+            try:
+                ext = os.path.splitext(file["path"])[1]
+                mt.guess_extension(ext)
+                res = mt.types_map[ext]
+                if res in GREY_LIST:
+                    continue
+                if (res.startswith("audio")):
+                    return [os.path.join(download_path, self.config["sub_audio"]), "audio"]
+                elif (res.startswith("video")):
+                    return [os.path.join(download_path, self.config["sub_video"]), "video"]
+                elif(ext in DOC_FORMAT):
+                    return [os.path.join(download_path, self.config["sub_documents"]), "doc"]
+                elif(ext in DATA_FORMAT):
+                    return [os.path.join(download_path, self.config["sub_data"]), "data"]
+
+            except KeyError:
+                    log.debug("unknown extension %s, trying again", ext)
+                    continue
+                    
+        return [os.path.join(download_path, self.config["sub_uncat"]), "uncategorized"]
+    
     
     def _convert_bytes(self, bytes):
         bytes = float(bytes)
