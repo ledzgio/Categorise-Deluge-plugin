@@ -43,9 +43,7 @@ import deluge.component as component
 import deluge.configmanager
 from deluge.core.rpcserver import export
 from deluge.core.core import Core
-import shutil
 import os
-import random
 import mimetypes as mt
 from send_message import send_msg
 import datetime
@@ -65,12 +63,12 @@ DEFAULT_PREFS = {
     "enable_notification":False
 }
 #File formats
-DOC_FORMAT = [".pdf",".doc",".ods", ".txt", ".odt", ".xls", ".docx"]
+DOC_FORMAT = [".pdf", ".doc", ".ods", ".txt", ".odt", ".xls", ".docx"]
 DATA_FORMAT = [".iso", ".img", ".mds", ".mdf", ".nrg", ".bin", ".cue",
                ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", 
                ".exe", ".msi", ".vob", ".VOB", ".BUP", ".IFO"]
-GREY_LIST = [".txt", ".nfo", ".jpg", ".bmp", ".gif", ".m3u" ".sfv", ".url", ".sub", 
-             ".srt", ".idx", ".rtf", ".htm"]
+GREY_LIST = [".txt", ".nfo", ".jpg", ".bmp", ".gif", ".m3u" ".sfv", ".url",
+              ".sub", ".srt", ".idx", ".rtf", ".htm"]
 
 class Core(CorePluginBase):
     def enable(self):
@@ -93,15 +91,6 @@ class Core(CorePluginBase):
         total_download_converted = self._convert_bytes(total_download_byte)
         torrent_name = torrent.get_status(["name"])["name"]
         
-        """
-        TODO
-        torrent_eta = torrent.get_eta()
-        torrent_ratio = torrent.get_ratio()
-        log.debug("#################################")
-        log.debug("ETA: %s", torrent_eta)
-        log.debug("RATIO: %s", torrent_ratio)
-        """
-        
         log.debug("completed torrent: %s", torrent_name)
         
         files = torrent.get_files()
@@ -111,13 +100,14 @@ class Core(CorePluginBase):
                 
         #get destination path
         dest = self._guess_destination(files)
-        i = 0
+        #i = 0
         for f in files:
-            i = i + 1
+            #i = i + 1
             downloaded_file_path = f["path"]
             torrent_details = torrent_details + downloaded_file_path + "\n"
-            if i == 3:
-                torrent_details = torrent_details + "..."+`len(files)-i`+" more\n"
+            if files.index(f) == 3:
+            #if i == 3:
+                torrent_details = torrent_details + "..."+`len(files) - files.index(f)`+" more\n"
                 break
 	    now = datetime.datetime.now()
 	    date_time = now.strftime("%Y-%m-%d, %H:%M")
