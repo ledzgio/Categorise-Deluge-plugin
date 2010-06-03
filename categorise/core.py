@@ -68,8 +68,9 @@ DEFAULT_PREFS = {
 DOC_FORMAT = [".pdf",".doc",".ods", ".txt", ".odt", ".xls", ".docx"]
 DATA_FORMAT = [".iso", ".img", ".mds", ".mdf", ".nrg", ".bin", ".cue",
                ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", 
-               ".exe", ".msi", ".vob", ".nfo"]
-GREY_LIST = [".txt", ".nfo", ".jpg", ".gif", ".m3u" ".sfv", ".url", ".sub", ".srt"]
+               ".exe", ".msi", ".vob", ".VOB", ".BUP", ".IFO"]
+GREY_LIST = [".txt", ".nfo", ".jpg", ".bmp", ".gif", ".m3u" ".sfv", ".url", ".sub", 
+             ".srt", ".idx", ".rtf", ".htm"]
 
 class Core(CorePluginBase):
     def enable(self):
@@ -150,6 +151,7 @@ class Core(CorePluginBase):
                 mt.guess_extension(ext)
                 res = mt.types_map[ext]
                 if res in GREY_LIST:
+                    log.debug("skipping GREY_LIST extension %s", res)
                     continue
                 if (res.startswith("audio")):
                     return [os.path.join(download_path, self.config["sub_audio"]), "audio"]
