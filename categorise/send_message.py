@@ -41,7 +41,8 @@ class PyXmppThread(threading.Thread):
 
 def send_msg(message, jabber_id, jabber_password, jabber_recpt):
     if not pyxmpp_exception:
-        xmpp = PyXmppThread(message, jabber_id, jabber_password, jabber_recpt)#send message
+        #starting the thread
+        xmpp = PyXmppThread(message, jabber_id, jabber_password, jabber_recpt)
         xmpp.start()
         return True
     else:

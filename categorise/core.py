@@ -62,13 +62,13 @@ DEFAULT_PREFS = {
     "jabber_recpt_id":"",
     "enable_notification":False
 }
-#File formats
+#file formats extension
 DOC_FORMAT = [".pdf", ".doc", ".ods", ".txt", ".odt", ".xls", ".docx"]
 DATA_FORMAT = [".iso", ".img", ".mds", ".mdf", ".nrg", ".bin", ".cue",
                ".zip", ".rar", ".tar", ".bz2", ".tar.gz", ".tgz", ".r00", 
-               ".exe", ".msi", ".vob", ".VOB", ".BUP", ".IFO"]
+               ".exe", ".msi", ".vob", ".bup", ".ifo"]
 GREY_LIST = [".txt", ".nfo", ".jpg", ".bmp", ".gif", ".m3u" ".sfv", ".url",
-              ".sub", ".srt", ".idx", ".rtf", ".htm"]
+              ".sub", ".srt", ".idx", ".rtf", ".htm", ".log"]
 
 class Core(CorePluginBase):
     def enable(self):
@@ -85,7 +85,8 @@ class Core(CorePluginBase):
         pass
         
     def _on_torrent_finished(self, torrent_id):
-        """Get the save path"""
+        """called on torrent finished event"""
+        #get the torrent by torrent_id
         torrent = component.get("TorrentManager")[torrent_id]
         total_download_byte = torrent.get_status(["total_payload_download"])["total_payload_download"]
         total_download_converted = self._convert_bytes(total_download_byte)
@@ -95,18 +96,15 @@ class Core(CorePluginBase):
         
         files = torrent.get_files()
         
-        """create torrent details string"""
+        #"""create torrent details string
         torrent_details = "\nTorrent name: "+torrent_name+"\nSize: "+ `total_download_converted` +"\nContained file(s): "+`len(files)`+"\n"
                 
         #get destination path
         dest = self._guess_destination(files)
-        #i = 0
         for f in files:
-            #i = i + 1
             downloaded_file_path = f["path"]
             torrent_details = torrent_details + downloaded_file_path + "\n"
             if files.index(f) == 3:
-            #if i == 3:
                 torrent_details = torrent_details + "..."+`len(files) - files.index(f)`+" more\n"
                 break
 	    now = datetime.datetime.now()
@@ -117,15 +115,14 @@ class Core(CorePluginBase):
             log.debug("directory "+ dest[0] +" does not exists, it will be created")
             os.makedirs(dest[0])
             
-        """moving torrent storage to final destination"""
+        #moving torrent storage to final destination
         torrent.move_storage(dest[0])
         torrent.is_finished = True
         torrent.update_state()
 
         log.debug("moving completed torrent containing "+`len(files)`+" file(s) to %s", dest[0])
        
-        """sending message to jabber user"""
-        #decode password
+        #sending message to jabber user
         decoded_password = self._decode_password(self.config["jabber_password"])
         if(self.config["enable_notification"] and self.config["jabber_id"] and decoded_password and self.config["jabber_recpt_id"]):
             sent = send_msg(torrent_details, self.config["jabber_id"], decoded_password, self.config["jabber_recpt_id"])
@@ -133,11 +130,16 @@ class Core(CorePluginBase):
                 log.debug("Notification not sent. Check if you have pyxmpp module installed on you system")
             
     def _guess_destination(self, torrent_files):
+        """
+        try to identify the correct category of the finished torrent 
+        and return the destination path where the torrent has to be moved
+        """
         download_path = self.config["download_path"]
 
         for file in torrent_files:
             try:
                 ext = os.path.splitext(file["path"])[1]
+                ext = ext.lower()
                 mt.guess_extension(ext)
                 res = mt.types_map[ext]
                 if res in GREY_LIST:
@@ -160,6 +162,7 @@ class Core(CorePluginBase):
     
     
     def _convert_bytes(self, bytes):
+        """return the size of the finished torrent"""
         bytes = float(bytes)
         if bytes >= 1099511627776:
             terabytes = bytes / 1099511627776
