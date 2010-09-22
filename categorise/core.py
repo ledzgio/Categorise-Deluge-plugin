@@ -47,6 +47,7 @@ import os
 import mimetypes as mt
 from send_message import send_msg
 import datetime
+from deluge.ui.client import client
 
 DEFAULT_PREFS = {
     #sub directories
@@ -88,6 +89,7 @@ class Core(CorePluginBase):
         """called on torrent finished event"""
         #get the torrent by torrent_id
         torrent = component.get("TorrentManager")[torrent_id]
+        
         total_download_byte = torrent.get_status(["total_payload_download"])["total_payload_download"]
         total_download_converted = self._convert_bytes(total_download_byte)
         torrent_name = torrent.get_status(["name"])["name"]
@@ -96,33 +98,35 @@ class Core(CorePluginBase):
         
         files = torrent.get_files()
         
-        #"""create torrent details string
-        torrent_details = "\nTorrent name: "+torrent_name+"\nSize: "+ `total_download_converted` +"\nContained file(s): "+`len(files)`+"\n"
+        #create torrent details string
+        torrent_details = "\nTorrent name: "+torrent_name+"\nSize: "+ total_download_converted +"\nContained file(s): "+`len(files)`+"\n"
                 
         #get destination path
         dest = self._guess_destination(files)
         for f in files:
             downloaded_file_path = f["path"]
-            torrent_details = torrent_details + downloaded_file_path + "\n"
+            torrent_details = torrent_details + " * " +downloaded_file_path + "\n"
             if files.index(f) == 3:
                 torrent_details = torrent_details + "..."+`len(files) - files.index(f)`+" more\n"
                 break
 	    now = datetime.datetime.now()
 	    date_time = now.strftime("%Y-%m-%d, %H:%M")
-        torrent_details = torrent_details + "Identified type: "+dest[1]+"\nCompleted at: "+ date_time +"\nMoved to folder: "+dest[0]
+        tracker = torrent.get_tracker_host()
+        torrent_details = torrent_details + "Tracker: "+ tracker +"\nPeers: "+ `len(torrent.get_peers())`
+        torrent_details = torrent_details + "\nIdentified type: "+dest[1]+"\nCompleted at: "+ date_time +"\nMoved to folder: "+dest[0]
         
         if not os.path.exists(dest[0]):
             log.debug("directory "+ dest[0] +" does not exists, it will be created")
             os.makedirs(dest[0])
             
-        #moving torrent storage to final destination
+        #moving torrent storage to final destination and updating torrent state
         torrent.move_storage(dest[0])
         torrent.is_finished = True
         torrent.update_state()
 
         log.debug("moving completed torrent containing "+`len(files)`+" file(s) to %s", dest[0])
        
-        #sending message to jabber user
+        #sending message to the jabber user
         decoded_password = self._decode_password(self.config["jabber_password"])
         if(self.config["enable_notification"] and self.config["jabber_id"] and decoded_password and self.config["jabber_recpt_id"]):
             sent = send_msg(torrent_details, self.config["jabber_id"], decoded_password, self.config["jabber_recpt_id"])
@@ -166,18 +170,18 @@ class Core(CorePluginBase):
         bytes = float(bytes)
         if bytes >= 1099511627776:
             terabytes = bytes / 1099511627776
-            size = '%.2fTb' % terabytes
+            size = "%.2fTb" % terabytes
         elif bytes >= 1073741824:
             gigabytes = bytes / 1073741824
-            size = '%.2fGb' % gigabytes
+            size = "%.2fGb" % gigabytes
         elif bytes >= 1048576:
             megabytes = bytes / 1048576
-            size = '%.2fMb' % megabytes
+            size = "%.2fMb" % megabytes
         elif bytes >= 1024:
             kilobytes = bytes / 1024
-            size = '%.2fKb' % kilobytes
+            size = "%.2fKb" % kilobytes
         else:
-            size = '%.2fbytes' % bytes
+            size = "%.2fbytes" % bytes
         return size
     
     def _decode_password(self, enc_passwd):
