@@ -63,7 +63,7 @@ class GtkUI(GtkPluginBase):
         component.get("PluginManager").deregister_hook("on_apply_prefs", self.on_apply_prefs)
         component.get("PluginManager").deregister_hook("on_show_prefs", self.on_show_prefs)
         del self.glade
-
+    
     def on_apply_prefs(self):
         log.debug("Applying prefs for Categorise")
         download_path = self.glade.get_widget("download_folder").get_current_folder()

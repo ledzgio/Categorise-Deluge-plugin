@@ -45,7 +45,7 @@ from deluge.core.rpcserver import export
 from deluge.core.core import Core
 import os
 import mimetypes as mt
-from send_message import send_msg
+#from send_message import send_msg
 import datetime
 from deluge.ui.client import client
 
@@ -73,25 +73,36 @@ GREY_LIST = [".txt", ".nfo", ".jpg", ".bmp", ".gif", ".m3u" ".sfv", ".url",
 
 class Core(CorePluginBase):
     def enable(self):
-        log.debug("Enabling Categorise plugin..")
+        log.debug("Enabling Categorise plugin")
         self.config = deluge.configmanager.ConfigManager("categorise.conf", DEFAULT_PREFS)
                 
         #setting event
         component.get("EventManager").register_event_handler("TorrentFinishedEvent", self._on_torrent_finished)
     
     def disable(self):
-        log.debug("Disabling Categorise plugin.")
+        log.debug("Disabling Categorise plugin")
         
     def update(self):
         pass
         
     def _on_torrent_finished(self, torrent_id):
+        
+        log.debug("called on torrent finished event: %s", torrent_id)
+        
         """called on torrent finished event"""
         #get the torrent by torrent_id
         torrent = component.get("TorrentManager")[torrent_id]
         
+        log.debug("called on torrent finished event: %s", torrent)
+        
         total_download_byte = torrent.get_status(["total_payload_download"])["total_payload_download"]
+        
+        log.debug("called on torrent finished event: %s", total_download_byte)
+        
         total_download_converted = self._convert_bytes(total_download_byte)
+        
+        log.debug("called on torrent finished event: %s", total_download_converted)
+        
         torrent_name = torrent.get_status(["name"])["name"]
         
         log.debug("completed torrent: %s", torrent_name)
@@ -128,7 +139,10 @@ class Core(CorePluginBase):
        
         #sending message to the jabber user
         decoded_password = self._decode_password(self.config["jabber_password"])
+        
         if(self.config["enable_notification"] and self.config["jabber_id"] and decoded_password and self.config["jabber_recpt_id"]):
+            #import send_message only when necessary to avoid missing python-pyxmpp library
+            from send_message import send_msg
             sent = send_msg(torrent_details, self.config["jabber_id"], decoded_password, self.config["jabber_recpt_id"])
             if not sent:
                 log.debug("Notification not sent. Check if you have pyxmpp module installed on you system")

@@ -1,12 +1,13 @@
 import sys
 import threading
+from deluge.log import LOG as log
 
 try:
     pyxmpp_exception = False
     from pyxmpp.jid import JID
     from pyxmpp.jabber.simple import send_message
 except ImportError:
-    print("pyxmpp module is required to work properly, notificazion won't be sent")
+    log.debug("pyxmpp library is missing but is required to work properly, notificazion won't be sent")
     pyxmpp_exception = True
 
 class PyXmpp:

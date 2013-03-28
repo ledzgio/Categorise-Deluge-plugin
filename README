@@ -1,7 +1,9 @@
 Categorise deluge plugin version 0.3.2 compatible with Deluge 1.3.x
 
-If you already have Categorise at version prior to 0.3.1, you should remove Categorise config file:
+If you already have Categorise at version prior to 0.3.2, you should remove Categorise config file:
 rm $HOME/.config/deluge/categorise.conf
+
+In order to send notification through Jabber you have to install pyxmpp libraries.
 
 Changelog:
 http://github.com/ledzgio/Categorise-Deluge-plugin/commits/master/
