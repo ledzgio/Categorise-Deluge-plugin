@@ -12,3 +12,8 @@ Load the .egg file through the deluge plugin preferences page
 
 Manual install:
 Simply copy the .egg generated installation file to $HOME/.config/deluge/plugins
+
+Install pyxmpp for the Jabber notification feature. 
+
+On debian/ubuntu/linux-mint:
+apt-get install python-pyxmpp
